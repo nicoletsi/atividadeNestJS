@@ -15,7 +15,7 @@ export class CentroCusto {
   codigo: string;
 
   @Column({ name: 'saldo_disponivel', type: 'decimal', precision: 12, scale: 2, default: 0 })
-  saldoDisponivel: number;
+  saldoDisponivel: string;
 
   @VersionColumn({ name: 'versao' })
   versao: number;

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 
 export type Papel = 'solicitante' | 'gestor' | 'auditor';
 
@@ -20,7 +21,7 @@ export class UsuariosService {
       id: 1,
       nome: 'Ana Lima',
       email: 'ana@empresa.com',
-      senhaHash: '$2b$12$DJnB5VtBCX4.W24cPqlQDuCvFTjcjaau6NMur0QBEj.oWzecCiz0m',
+      senhaHash: bcrypt.hashSync(process.env.USUARIO_GESTOR_SENHA ?? '', 12),
       papel: 'gestor',
       ativo: true,
     },
@@ -28,7 +29,7 @@ export class UsuariosService {
       id: 2,
       nome: 'Bruno Silva',
       email: 'bruno@empresa.com',
-      senhaHash: '$2b$12$DJnB5VtBCX4.W24cPqlQDuCvFTjcjaau6NMur0QBEj.oWzecCiz0m',
+      senhaHash: bcrypt.hashSync(process.env.USUARIO_SOLICITANTE_SENHA ?? '', 12),
       papel: 'solicitante',
       ativo: true,
     },

@@ -8,6 +8,17 @@ import { CriarSolicitacaoDto } from './dto/criar-solicitacao.dto';
 import { FiltrarSolicitacoesDto } from './dto/filtrar-solicitacoes.dto';
 import { Solicitacao } from './solicitacao.entity';
 
+function converterParaCentavos(valor: string): bigint {
+  const [inteiros, decimais = ''] = valor.split('.');
+  return BigInt(inteiros) * 100n + BigInt(decimais.padEnd(2, '0').slice(0, 2));
+}
+
+function formatarCentavos(valor: bigint): string {
+  const sinal = valor < 0n ? '-' : '';
+  const absoluto = valor < 0n ? -valor : valor;
+  return `${sinal}${absoluto / 100n}.${(absoluto % 100n).toString().padStart(2, '0')}`;
+}
+
 @Injectable()
 export class SolicitacoesService {
   constructor(
@@ -53,7 +64,7 @@ export class SolicitacoesService {
     const solicitacao = this.repository.create({
       titulo: dto.titulo,
       centroCusto: dto.centroCusto,
-      valorEstimado: dto.valorEstimado,
+      valorEstimado: dto.valorEstimado.toFixed(2),
       prioridade: dto.prioridade,
       status: 'pendente',
     });
@@ -88,10 +99,10 @@ export class SolicitacoesService {
         throw new ConflictException('Versão do centro de custo está desatualizada');
       }
 
-      const valorEstimado = Number(solicitacao.valorEstimado ?? 0);
-      const saldoDisponivel = Number(centroCusto.saldoDisponivel ?? 0);
+      const valorEstimado = converterParaCentavos(solicitacao.valorEstimado ?? '0');
+      const saldoDisponivel = converterParaCentavos(centroCusto.saldoDisponivel ?? '0');
 
-      if (valorEstimado < 0 || saldoDisponivel < 0) {
+      if (valorEstimado < 0n || saldoDisponivel < 0n) {
         throw new ConflictException('Saldo e valor estimado devem ser válidos');
       }
 
@@ -99,8 +110,8 @@ export class SolicitacoesService {
         throw new ConflictException('Saldo insuficiente para aprovar esta solicitação');
       }
 
-      const saldoAnterior = saldoDisponivel;
-      const saldoResultante = saldoDisponivel - valorEstimado;
+      const saldoAnterior = formatarCentavos(saldoDisponivel);
+      const saldoResultante = formatarCentavos(saldoDisponivel - valorEstimado);
 
       const solicitacaoAtualizada = await manager
         .createQueryBuilder()
@@ -121,8 +132,8 @@ export class SolicitacoesService {
         .set({ saldoDisponivel: () => 'saldo_disponivel - :valor', versao: () => 'versao + 1' })
         .where('codigo = :codigo', { codigo: solicitacao.centroCusto })
         .andWhere('versao = :versao', { versao: dto.versaoCentroCusto })
-        .andWhere('saldo_disponivel >= :valor', { valor: valorEstimado })
-        .setParameters({ valor: valorEstimado })
+        .andWhere('saldo_disponivel >= :valor', { valor: formatarCentavos(valorEstimado) })
+        .setParameters({ valor: formatarCentavos(valorEstimado) })
         .execute();
 
       if (centroAtualizado.affected !== 1) {
@@ -136,7 +147,7 @@ export class SolicitacoesService {
         recursoId: id,
         detalhes: {
           centroCusto: solicitacao.centroCusto,
-          valorReservado: valorEstimado,
+          valorReservado: formatarCentavos(valorEstimado),
           saldoAnterior,
           saldoResultante,
           statusAnterior: 'pendente',

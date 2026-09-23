@@ -2,9 +2,6 @@
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
@@ -37,41 +34,56 @@ $ npm install
 # development
 $ npm run start
 
-# watch mode
-$ npm run start:dev
+## Configuração
 
-# production mode
-$ npm run start:prod
-```
-
-## Run tests
+Requisitos: Node.js 22+, Docker e Docker Compose.
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cp .env.example .env
 ```
 
-## Deployment
+Preencha no `.env` `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`,
+`USUARIO_GESTOR_SENHA` e `USUARIO_SOLICITANTE_SENHA` com valores locais.
+O arquivo `.env` é ignorado pelo Git e não deve ser commitado.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Executar com Docker
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose up --build -d
+docker compose exec api npm run seed
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+A API fica disponível em `http://localhost:3000`. As migrations são executadas
+automaticamente na inicialização. O seed cria o centro `CC-1234` e duas
+solicitações pendentes de forma repetível.
 
-## Observability
+Para reconstruir o banco do zero:
 
+```bash
+docker compose down -v
+docker compose up --build -d
+docker compose exec api npm run seed
+```
+
+## Executar sem Docker
+
+Inicie um PostgreSQL local, ajuste `DB_HOST`, `DB_PORT` e as demais variáveis
+no `.env`, e execute:
+
+```bash
+npm ci
+npm run migration:run
+npm run seed
+npm run start:dev
+```
+
+## Testes
+
+```bash
+npm test
+npm run test:e2e
+npm run build
+```
 In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
 
 [NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:

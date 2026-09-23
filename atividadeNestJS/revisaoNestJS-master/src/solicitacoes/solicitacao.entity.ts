@@ -32,7 +32,7 @@ export class Solicitacao {
   centroCustoInfo: CentroCusto;
 
   @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
-  valorEstimado: number;
+  valorEstimado: string;
 
   @Column({ type: 'varchar', length: 10, default: 'normal' })
   prioridade: PrioridadeSolicitacao;

@@ -40,11 +40,6 @@ export class SolicitacoesController {
     @Body() dto: AprovarSolicitacaoDto,
     @Req() request: RequisicaoAutenticada,
   ) {
-    const versaoSolicitacao = dto.versaoSolicitacao ?? dto.versao;
-
-    return this.solicitacoesService.aprovar(id, {
-      ...dto,
-      versaoSolicitacao,
-    }, request.user.id);
+    return this.solicitacoesService.aprovar(id, dto, request.user.id);
   }
 }

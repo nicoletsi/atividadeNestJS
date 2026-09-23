@@ -17,6 +17,10 @@ export class CentrosCustoService {
       throw new NotFoundException('Centro de custo não encontrado');
     }
 
-    return centroCusto;
+    return {
+      codigo: centroCusto.codigo,
+      saldoDisponivel: centroCusto.saldoDisponivel,
+      versao: centroCusto.versao,
+    };
   }
 }
